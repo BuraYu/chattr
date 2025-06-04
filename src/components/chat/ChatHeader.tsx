@@ -8,7 +8,7 @@ export default function ChatHeader() {
         <h2 className="text-base leading-none font-bold">general</h2>
       </div>
       <button className="p-2 rounded-full hover:bg-gray-200 transition">
-        <Ellipsis w-3 />
+        <Ellipsis w-5 h-5 />
       </button>
     </div>
   );
