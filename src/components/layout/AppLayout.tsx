@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import SidebarNav from "../sidebar/SidebarNav";
 
 type AppLayoutProps = {
   children?: ReactNode;
@@ -9,7 +10,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     <div className="h-screen w-screen flex overflow-hidden">
       {/* left side */}
       <aside className="w-[280px] border-r border-muted bg-background hidden md:block">
-        <p>This is the Sidebar</p>
+        <SidebarNav />
       </aside>
 
       {/* right side */}
