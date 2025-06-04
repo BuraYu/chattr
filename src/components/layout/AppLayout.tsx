@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import SidebarNav from "../sidebar/SidebarNav";
+import ChatArea from "../chat/ChatArea";
 
 type AppLayoutProps = {
   children?: ReactNode;
@@ -15,7 +16,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       {/* right side */}
       <main className="flex-1 bg-muted/40">
-        <p>This is the Chat area</p>
+        <ChatArea />
       </main>
     </div>
   );
