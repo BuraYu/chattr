@@ -2,11 +2,11 @@ import type { ReactNode } from "react";
 import SidebarNav from "../sidebar/SidebarNav";
 import ChatArea from "../chat/ChatArea";
 
-type AppLayoutProps = {
-  children?: ReactNode;
-};
+// type AppLayoutProps = {
+//   children?: ReactNode;
+// };
 
-export default function AppLayout({ children }: AppLayoutProps) {
+export default function AppLayout() {
   return (
     <div className="h-screen w-screen flex overflow-hidden">
       {/* left side */}
