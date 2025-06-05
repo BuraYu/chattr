@@ -1,36 +1,45 @@
-import { Hash } from "lucide-react";
+"use client";
+
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { setCurrentChannel } from "@/store/slices/channelSlice";
 import { cn } from "@/lib/utils";
+import { Hash } from "lucide-react";
 
 type Props = {
-  name: string;
-  unread?: boolean;
-  unreadCount?: number;
-  onClick?: () => void;
+  channel: {
+    name: string;
+    unread?: boolean;
+    unreadCount?: number;
+  };
 };
 
-export default function ChannelItem({
-  name,
-  unread,
-  unreadCount,
-  onClick,
-}: Props) {
+export default function ChannelItem({ channel }: Props) {
+  const dispatch = useDispatch();
+  const currentChannel = useSelector(
+    (state: RootState) => state.channel.currentChannel
+  );
+
+  const isActive = currentChannel === channel.name;
+
   return (
     <button
-      onClick={onClick}
+      onClick={() => dispatch(setCurrentChannel(channel.name))}
       className={cn(
         "flex items-center justify-between px-2 py-1.5 rounded-md text-sm w-full text-left hover:bg-accent transition",
-        "focus-visible:outline-none",
-        unread && "font-semibold text-primary"
+        isActive
+          ? "bg-accent font-semibold text-primary"
+          : "text-muted-foreground"
       )}
     >
-      <span className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <Hash className="w-4 h-4 shrink-0" />
-        {name}
-      </span>
+        {channel.name}
+      </div>
 
-      {unreadCount && (
-        <span className="ml-auto text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5 min-w-[20px] text-center">
-          {unreadCount}
+      {channel.unreadCount && (
+        <span className="ml-auto text-xs bg-primary text-white rounded-full px-2 py-0.5">
+          {channel.unreadCount}
         </span>
       )}
     </button>
