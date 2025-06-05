@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+// import type { ReactNode } from "react";
 import SidebarNav from "../sidebar/SidebarNav";
 import ChatArea from "../chat/ChatArea";
 
