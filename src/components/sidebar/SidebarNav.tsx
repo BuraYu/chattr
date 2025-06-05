@@ -1,13 +1,7 @@
+import { mockChannels } from "@/data/channels";
 import ChannelList from "./ChannelList";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus } from "lucide-react";
-
-const mockChannels = [
-  { name: "general", unread: true, unreadCount: 3 },
-  { name: "dev-chat" },
-  { name: "design", unread: true, unreadCount: 7 },
-  { name: "random" },
-];
 
 export default function SidebarNav() {
   return (
