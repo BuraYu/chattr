@@ -5,10 +5,10 @@ export type Channel = {
 };
 
 export const mockChannels: Channel[] = [
-  { name: "general", unread: true, unreadCount: 3 },
+  { name: "general", unread: true, unreadCount: 2 },
   { name: "dev-chat" },
-  { name: "design", unread: true, unreadCount: 7 },
+  { name: "design", unread: true, unreadCount: 2 },
   { name: "random" },
   { name: "product" },
-  { name: "sales", unread: true, unreadCount: 1 },
+  { name: "sales" },
 ];
