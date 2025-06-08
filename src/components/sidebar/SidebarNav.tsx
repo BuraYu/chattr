@@ -1,7 +1,5 @@
 "use client";
 
-import { useAppSelector } from "@/store/store";
-import { selectChannels } from "@/store/slices/channelSlice";
 import ChannelList from "./ChannelList";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus } from "lucide-react";
@@ -9,11 +7,6 @@ import AddChannelModal from "./AddChannelModal";
 import { useState } from "react";
 
 export default function SidebarNav() {
-  const channels = useAppSelector(selectChannels).filter(
-    (c) => c.name.trim() !== ""
-  );
-  console.log("Filtered channels:", channels);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   function handleAddClick() {
@@ -35,7 +28,7 @@ export default function SidebarNav() {
       </div>
 
       <ScrollArea className="flex-1 pr-1">
-        <ChannelList channels={channels} />
+        <ChannelList />
       </ScrollArea>
 
       <div className="mt-4 text-xs text-muted-foreground">User info</div>

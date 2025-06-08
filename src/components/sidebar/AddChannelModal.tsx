@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Dialog,
   DialogContent,
@@ -10,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAppDispatch } from "@/store/store";
-import { addChannel } from "@/store/slices/channelSlice";
+import { addChannelToDB } from "@/store/slices/channelSlice";
 
 interface Props {
   open: boolean;
@@ -23,7 +21,7 @@ export default function AddChannelModal({ open, onClose }: Props) {
 
   function handleCreate() {
     if (!channelName.trim()) return;
-    dispatch(addChannel({ name: channelName.trim() }));
+    dispatch(addChannelToDB({ name: channelName.trim() }));
     onClose();
     setChannelName("");
   }
