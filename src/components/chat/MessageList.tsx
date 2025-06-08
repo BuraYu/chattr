@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import mockMessages from "@/data/messages";
+import { selectMessagesByChannel } from "@/store/slices/messageSlice";
 import type { RootState } from "@/store/store";
 import MessageItem from "./MessageItem";
 
@@ -11,13 +11,22 @@ export default function MessageList({ className }: Props) {
   const currentChannel = useSelector(
     (state: RootState) => state.channel.currentChannel
   );
-
-  const channelMessages = mockMessages[currentChannel] || [];
+  const channelMessages = useSelector(selectMessagesByChannel(currentChannel));
 
   return (
-    <div className={className}>
+    <div className={`flex flex-col gap-2 ${className}`}>
       {channelMessages.length > 0 ? (
-        channelMessages.map((msg, i) => <MessageItem key={i} {...msg} />)
+        channelMessages.map((msg) => (
+          <MessageItem
+            key={msg.id}
+            name={msg.sender}
+            text={msg.content}
+            time={new Date(msg.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          />
+        ))
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
           <svg
