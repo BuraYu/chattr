@@ -6,7 +6,7 @@ import {
 } from "@/store/slices/messageSlice";
 import {
   selectCurrentChannelId,
-  selectCurrentChannelName,
+  // selectCurrentChannelName,
 } from "@/store/slices/channelSlice";
 import MessageItem from "./MessageItem";
 
@@ -17,7 +17,7 @@ type Props = {
 export default function MessageList({ className }: Props) {
   const dispatch = useAppDispatch();
   const currentChannelId = useAppSelector(selectCurrentChannelId);
-  const currentChannelName = useAppSelector(selectCurrentChannelName);
+  // const currentChannelName = useAppSelector(selectCurrentChannelName);
   const messages = useAppSelector(selectMessagesByChannel(currentChannelId));
 
   useEffect(() => {
