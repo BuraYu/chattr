@@ -1,10 +1,8 @@
-"use client";
-
 import { Smile, Send } from "lucide-react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { sendMessage } from "@/store/slices/messageSlice";
-import { selectCurrentChannel } from "@/store/slices/channelSlice";
+import { selectCurrentChannelId } from "@/store/slices/channelSlice";
+import { sendMessageToDB } from "@/store/slices/messageSlice";
 
 type Props = {
   className?: string;
@@ -13,25 +11,25 @@ type Props = {
 export default function MessageInputBox({ className }: Props) {
   const [input, setInput] = useState("");
   const dispatch = useAppDispatch();
-  const currentChannel = useAppSelector(selectCurrentChannel);
+  const currentChannelId = useAppSelector(selectCurrentChannelId);
 
-  function handleSend() {
-    if (!input.trim()) return;
-
-    dispatch(
-      sendMessage({
-        channel: currentChannel,
-        message: {
-          id: crypto.randomUUID(),
-          sender: "The User",
+  const sendMessage = async () => {
+    if (!input.trim() || !currentChannelId) return;
+    // TODO FIX user id
+    try {
+      await dispatch(
+        sendMessageToDB({
+          channel_id: currentChannelId,
+          // user_id: "test user",
           content: input,
-          timestamp: Date.now(),
-        },
-      })
-    );
+        })
+      ).unwrap();
 
-    setInput("");
-  }
+      setInput("");
+    } catch (error) {
+      console.error("Message send failed:", error);
+    }
+  };
 
   return (
     <div className={className}>
@@ -46,11 +44,11 @@ export default function MessageInputBox({ className }: Props) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") handleSend();
+            if (e.key === "Enter") sendMessage();
           }}
         />
         <button
-          onClick={handleSend}
+          onClick={sendMessage}
           className="text-muted-foreground hover:text-primary transition"
         >
           <Send className="w-5 h-5" />

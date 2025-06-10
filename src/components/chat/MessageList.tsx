@@ -1,6 +1,13 @@
-import { useSelector } from "react-redux";
-import { selectMessagesByChannel } from "@/store/slices/messageSlice";
-import type { RootState } from "@/store/store";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import {
+  fetchMessagesByChannel,
+  selectMessagesByChannel,
+} from "@/store/slices/messageSlice";
+import {
+  selectCurrentChannelId,
+  selectCurrentChannelName,
+} from "@/store/slices/channelSlice";
 import MessageItem from "./MessageItem";
 
 type Props = {
@@ -8,20 +15,26 @@ type Props = {
 };
 
 export default function MessageList({ className }: Props) {
-  const currentChannel = useSelector(
-    (state: RootState) => state.channel.currentChannel
-  );
-  const channelMessages = useSelector(selectMessagesByChannel(currentChannel));
+  const dispatch = useAppDispatch();
+  const currentChannelId = useAppSelector(selectCurrentChannelId);
+  const currentChannelName = useAppSelector(selectCurrentChannelName);
+  const messages = useAppSelector(selectMessagesByChannel(currentChannelId));
+
+  useEffect(() => {
+    if (currentChannelId) {
+      dispatch(fetchMessagesByChannel(currentChannelId));
+    }
+  }, [currentChannelId, dispatch]);
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      {channelMessages.length > 0 ? (
-        channelMessages.map((msg) => (
+      {messages.length > 0 ? (
+        messages.map((msg) => (
           <MessageItem
             key={msg.id}
-            name={msg.sender}
+            name={msg.user_id || "Unknown"}
             text={msg.content}
-            time={new Date(msg.timestamp).toLocaleTimeString([], {
+            time={new Date(msg.created_at).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             })}

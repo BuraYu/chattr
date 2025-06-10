@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { createClient } from "@supabase/supabase-js";
 import type { RootState } from "../store";
 
@@ -15,21 +15,27 @@ export type Message = {
   created_at: string;
 };
 
+type NewMessagePayload = {
+  channel_id: string;
+  user_id?: string;
+  content: string;
+};
+
 interface MessagesState {
-  messages: Message[];
+  messagesByChannel: {
+    [channelId: string]: Message[];
+  };
   loading: boolean;
   error?: string;
 }
 
 const initialState: MessagesState = {
-  messages: [],
+  messagesByChannel: {},
   loading: false,
-  error: undefined,
 };
 
-// Fetch messages for a specific channel
-export const fetchMessages = createAsyncThunk<Message[], string>(
-  "messages/fetchMessages",
+export const fetchMessagesByChannel = createAsyncThunk<Message[], string>(
+  "messages/fetchByChannel",
   async (channelId) => {
     const { data, error } = await supabase
       .from("messages")
@@ -42,54 +48,66 @@ export const fetchMessages = createAsyncThunk<Message[], string>(
   }
 );
 
-export const sendMessageToDB = createAsyncThunk<
-  Message,
-  { channel_id: string; user_id: string; content: string }
->("messages/sendMessageToDB", async ({ channel_id, user_id, content }) => {
-  const { data, error } = await supabase
-    .from("messages")
-    .insert({ channel_id, user_id, content })
-    .select()
-    .single();
+export const sendMessageToDB = createAsyncThunk<Message, NewMessagePayload>(
+  "messages/sendMessageToDB",
+  async ({ channel_id, user_id, content }) => {
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({ channel_id, user_id, content })
+      .select()
+      .single();
 
-  if (error) throw new Error(error.message);
-  return data as Message;
-});
+    if (error) throw new Error(error.message);
+    return data as Message;
+  }
+);
 
 const messageSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    clearMessages: (state) => {
-      state.messages = [];
+    sendMessage: (
+      state,
+      action: { payload: { channel: string; message: Message } }
+    ) => {
+      const { channel, message } = action.payload;
+      if (!state.messagesByChannel[channel]) {
+        state.messagesByChannel[channel] = [];
+      }
+      state.messagesByChannel[channel].push(message);
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchMessages.pending, (state) => {
+      .addCase(fetchMessagesByChannel.pending, (state) => {
         state.loading = true;
         state.error = undefined;
       })
-      .addCase(fetchMessages.fulfilled, (state, action) => {
+      .addCase(fetchMessagesByChannel.fulfilled, (state, action) => {
+        const messages = action.payload;
+        if (messages.length > 0) {
+          state.messagesByChannel[messages[0].channel_id] = messages;
+        }
         state.loading = false;
-        state.messages = action.payload;
       })
-      .addCase(fetchMessages.rejected, (state, action) => {
+      .addCase(fetchMessagesByChannel.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
-
       .addCase(sendMessageToDB.fulfilled, (state, action) => {
-        state.messages.push(action.payload);
-      })
-      .addCase(sendMessageToDB.rejected, (state, action) => {
-        state.error = action.error.message;
+        const msg = action.payload;
+        const ch = msg.channel_id;
+        if (!state.messagesByChannel[ch]) {
+          state.messagesByChannel[ch] = [];
+        }
+        state.messagesByChannel[ch].push(msg);
       });
   },
 });
 
-export const { clearMessages } = messageSlice.actions;
-export const selectMessages = (state: RootState) => state.messages.messages;
-export const selectMessagesLoading = (state: RootState) =>
-  state.messages.loading;
+export const { sendMessage } = messageSlice.actions;
+export const selectMessagesByChannel =
+  (channel: string) => (state: RootState) =>
+    state.messages.messagesByChannel[channel] || [];
+
 export default messageSlice.reducer;

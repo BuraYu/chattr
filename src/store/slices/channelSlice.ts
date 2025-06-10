@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { createClient } from "@supabase/supabase-js";
 
@@ -8,15 +9,17 @@ const supabase = createClient(
 );
 
 interface Channel {
-  id: string; 
+  id: string;
   name: string;
   unread?: boolean;
   unreadCount?: number;
 }
 
 interface ChannelState {
-  currentChannel: string;
+  currentChannelId: string;
   channels: Channel[];
+  idToNameMap: Record<string, string>;
+  nameToIdMap: Record<string, string>;
   loading: boolean;
   error?: string;
 }
@@ -25,7 +28,6 @@ export const fetchChannels = createAsyncThunk<Channel[]>(
   "channel/fetchChannels",
   async () => {
     const { data, error } = await supabase.from("channels").select("*");
-
     if (error) throw new Error(error.message);
     return (data as Channel[]) ?? [];
   }
@@ -46,8 +48,10 @@ export const addChannelToDB = createAsyncThunk<Channel, { name: string }>(
 );
 
 const initialState: ChannelState = {
-  currentChannel: "general",
+  currentChannelId: "",
   channels: [],
+  idToNameMap: {},
+  nameToIdMap: {},
   loading: false,
   error: undefined,
 };
@@ -56,8 +60,12 @@ const channelSlice = createSlice({
   name: "channel",
   initialState,
   reducers: {
-    setCurrentChannel: (state, action) => {
-      state.currentChannel = action.payload;
+    setCurrentChannelId: (state, action: PayloadAction<string>) => {
+      state.currentChannelId = action.payload;
+    },
+    setCurrentChannelByName: (state, action: PayloadAction<string>) => {
+      const id = state.nameToIdMap[action.payload];
+      if (id) state.currentChannelId = id;
     },
   },
   extraReducers: (builder) => {
@@ -69,6 +77,17 @@ const channelSlice = createSlice({
       .addCase(fetchChannels.fulfilled, (state, action) => {
         state.loading = false;
         state.channels = action.payload;
+
+        state.idToNameMap = {};
+        state.nameToIdMap = {};
+        for (const ch of action.payload) {
+          state.idToNameMap[ch.id] = ch.name;
+          state.nameToIdMap[ch.name] = ch.id;
+        }
+
+        if (!state.currentChannelId && state.nameToIdMap["general"]) {
+          state.currentChannelId = state.nameToIdMap["general"];
+        }
       })
       .addCase(fetchChannels.rejected, (state, action) => {
         state.loading = false;
@@ -79,7 +98,10 @@ const channelSlice = createSlice({
         state.error = undefined;
       })
       .addCase(addChannelToDB.fulfilled, (state, action) => {
-        state.channels.push(action.payload);
+        const newChannel = action.payload;
+        state.channels.push(newChannel);
+        state.idToNameMap[newChannel.id] = newChannel.name;
+        state.nameToIdMap[newChannel.name] = newChannel.id;
       })
       .addCase(addChannelToDB.rejected, (state, action) => {
         state.error = action.error.message;
@@ -88,7 +110,18 @@ const channelSlice = createSlice({
 });
 
 export const selectChannels = (state: RootState) => state.channel.channels;
-export const selectCurrentChannel = (state: RootState) =>
-  state.channel.currentChannel;
-export const { setCurrentChannel } = channelSlice.actions;
+export const selectCurrentChannelId = (state: RootState) =>
+  state.channel.currentChannelId;
+export const selectCurrentChannelName = (state: RootState) =>
+  state.channel.idToNameMap[state.channel.currentChannelId];
+
+export const selectChannelIdByName = (name: string) => (state: RootState) =>
+  state.channel.nameToIdMap[name];
+
+export const selectChannelNameById = (id: string) => (state: RootState) =>
+  state.channel.idToNameMap[id];
+
+export const { setCurrentChannelId, setCurrentChannelByName } =
+  channelSlice.actions;
+
 export default channelSlice.reducer;

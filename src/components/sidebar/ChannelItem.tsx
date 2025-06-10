@@ -1,6 +1,8 @@
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store/store";
-import { setCurrentChannel } from "@/store/slices/channelSlice";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import {
+  setCurrentChannelByName,
+  selectCurrentChannelName,
+} from "@/store/slices/channelSlice";
 import { cn } from "@/lib/utils";
 import { Hash } from "lucide-react";
 
@@ -13,16 +15,14 @@ type Props = {
 };
 
 export default function ChannelItem({ channel }: Props) {
-  const dispatch = useDispatch();
-  const currentChannel = useSelector(
-    (state: RootState) => state.channel.currentChannel
-  );
+  const dispatch = useAppDispatch();
+  const currentChannelName = useAppSelector(selectCurrentChannelName);
 
-  const isActive = currentChannel === channel.name;
+  const isActive = currentChannelName === channel.name;
 
   return (
     <button
-      onClick={() => dispatch(setCurrentChannel(channel.name))}
+      onClick={() => dispatch(setCurrentChannelByName(channel.name))}
       className={cn(
         "flex items-center justify-between px-2 py-1.5 rounded-md text-sm w-full text-left hover:bg-accent transition",
         isActive
