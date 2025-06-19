@@ -3,11 +3,9 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
   fetchMessagesByChannel,
   selectMessagesByChannel,
+  selectMessagesLoading, 
 } from "@/store/slices/messageSlice";
-import {
-  selectCurrentChannelId,
-  // selectCurrentChannelName,
-} from "@/store/slices/channelSlice";
+import { selectCurrentChannelId } from "@/store/slices/channelSlice";
 import MessageItem from "./MessageItem";
 
 type Props = {
@@ -17,8 +15,8 @@ type Props = {
 export default function MessageList({ className }: Props) {
   const dispatch = useAppDispatch();
   const currentChannelId = useAppSelector(selectCurrentChannelId);
-  // const currentChannelName = useAppSelector(selectCurrentChannelName);
   const messages = useAppSelector(selectMessagesByChannel(currentChannelId));
+  const loading = useAppSelector(selectMessagesLoading);
 
   useEffect(() => {
     if (currentChannelId) {
@@ -28,7 +26,12 @@ export default function MessageList({ className }: Props) {
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      {messages.length > 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+          <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+          <p className="text-lg font-medium">Loading messages...</p>
+        </div>
+      ) : messages.length > 0 ? (
         messages.map((msg) => (
           <MessageItem
             key={msg.id}

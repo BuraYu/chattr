@@ -31,7 +31,7 @@ interface MessagesState {
 
 const initialState: MessagesState = {
   messagesByChannel: {},
-  loading: false,
+  loading: true,
 };
 
 export const fetchMessagesByChannel = createAsyncThunk<Message[], string>(
@@ -109,5 +109,6 @@ export const { sendMessage } = messageSlice.actions;
 export const selectMessagesByChannel =
   (channel: string) => (state: RootState) =>
     state.messages.messagesByChannel[channel] || [];
-
+export const selectMessagesLoading = (state: RootState) =>
+  state.messages.loading;
 export default messageSlice.reducer;
